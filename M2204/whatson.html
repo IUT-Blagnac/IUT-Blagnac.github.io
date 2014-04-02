@@ -13,7 +13,7 @@
             var departs = o.query.results.p;
             results = '';
             for(var i=0;i<departs.length;i=i+3){  
-                results += "<li>"+departs[i]+' '+departs[i+1]+' '+departs[i+2].content+"</li>";
+                results += "<li>"+departs[i]+' '+departs[i+1]+' '+departs[i+2].content.replace(/\(.*\)/,'')+'<span class="landscape">'+departs[i+2].content.replace(/.*\(/,'(')+"</span></li>";
             }
             document.getElementById('resultatstram1').innerHTML = results;  
         }
@@ -23,7 +23,7 @@
             var departs = o.query.results.p;
             results = '<hr/>';
             for(var i=0;i<departs.length;i=i+3){  
-                results += "<li>"+departs[i]+' '+departs[i+1]+' '+departs[i+2].content+"</li>";
+                results += "<li>"+departs[i]+' '+departs[i+1]+' '+departs[i+2].content.replace(/\(.*\)/,'')+'<span class="landscape">'+departs[i+2].content.replace(/.*\(/,'(')+"</span></li>";
             }
             document.getElementById('resultatstram2').innerHTML = results;  
         }
@@ -33,7 +33,7 @@
             var departs = o.query.results.p;
             results = '<ol>';
             for(var i=0;i<departs.length;i=i+3){  
-                results += "<li>"+departs[i]+' '+departs[i+1]+' '+departs[i+2].content.replace(/\s*\(/,'<span class="landscape"> (').replace(/\)/,')</span>')+'</li>';
+                results += "<li>"+departs[i]+' '+departs[i+2].content.replace(/\s*\(/,'<span class="landscape"> (').replace(/\)/,')</span>')+'</li>';
             }
             results += '</ol>';
             if ( results == '' ) { results += '<hr/>'; }
@@ -50,7 +50,7 @@
             for(var i=0;i<vols.length;i++){  
                 var d = new Date();
                 d.setTime(vols[i][8] * 1000);
-                results += "<li>"+d.toLocaleTimeString() +' '+ vols[i][12].replace('Airport','') +' '+ '<span class="landscape">[' + vols[i][4] + '] </span>' +' '+ '<span class="'+vols[i][17][0].toLowerCase()+'">'+ vols[i][17][0]+ '</span>'+' '; 
+                results += "<li>"+d.toLocaleTimeString() +' '+ vols[i][12].replace(/[- ].*/,'')+'<span class="landscape">'+ vols[i][12].replace('Airport','').replace(/^[^- ]+/,'') +'</span> '+ '<span class="landscape">[' + vols[i][4] + '] </span>' +' '+ '<span class="'+vols[i][17][0].toLowerCase()+'">'+ vols[i][17][0]+ '</span>'+' '; 
                 if ( vols[i][17][1] > 0 ){ 
                     var d = new Date();
                     d.setTime(vols[i][17][1] * 1000);
@@ -66,7 +66,7 @@
             var trains = o.query.results.td;
             results = '';
             for(var i=0;i<trains.length;i=i+7){  
-                results += "<li>"+trains[i+1].p+' '+trains[i+2].p+' '+trains[i+3].p.content+' '+trains[i+4].p+' ' ;
+                results += "<li>"+trains[i+3].p.content.replace(/^(\d\d)/,"$1:")+' <span class="landscape">'+trains[i+1].p+' '+trains[i+2].p+'</span> '+trains[i+4].p+' ' ;
                 if (typeof trains[i+5].p != 'undefined'){
                     if (typeof trains[i+5].p.content != 'undefined') { results += '<span class="estimated">'+ trains[i+5].p.content +'</span>'; }
                     else { results += '<span class="landed">'+trains[i+5].p+'</span>'; }
@@ -91,13 +91,15 @@
             for (var k=CRENEAUX.length - 1;k>=0;k--){
                 if (hms < CRENEAUX[k][0]) {
                     nextK = k+1 ;
-                    var tab = /^(\d\d)(\d\d)/.exec(CRENEAUX[k][0]) ;
-                    resultsNext = tab[1] +'h'+tab[2] +' le '+currentDate.toLocaleDateString() ;
+                    var tab1 = /^(\d\d)(\d\d)/.exec(CRENEAUX[k][0]) ;
+                    var tab2 = /^(\d\d)(\d\d)/.exec(CRENEAUX[k][1]) ;
+                    resultsNext = tab1[1]+':'+tab1[2]+'<span class="landscape"> - '+tab2[1]+':'+tab2[2]+'</span> le '+currentDate.toLocaleDateString() ;
                 }
                 if ((hms > CRENEAUX[k][0]) && (hms < CRENEAUX[k][1])) {
                     currentK = k+1 ;
-                    var tab = /^(\d\d)(\d\d)/.exec(CRENEAUX[k][0]) ;
-                    resultsCurrent = tab[1] +'h'+tab[2] +' le '+currentDate.toLocaleDateString() ;
+                    var tab1 = /^(\d\d)(\d\d)/.exec(CRENEAUX[k][0]) ;
+                    var tab2 = /^(\d\d)(\d\d)/.exec(CRENEAUX[k][1]) ;
+                    resultsCurrent = tab1[1]+':'+tab1[2]+'<span class="landscape"> - '+tab2[1]+':'+tab2[2]+'</span> le '+currentDate.toLocaleDateString() ;
                 }
             }
             currentDK = D + 'K' + currentK ;
