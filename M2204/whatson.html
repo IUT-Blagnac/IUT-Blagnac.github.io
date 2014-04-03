@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8" /><title>What's On - V0.4</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" /><title>What's On - V0.5</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="stylesheet" href="http://netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" />
 <link rel="stylesheet" href="http://code.jquery.com/mobile/1.4.2/jquery.mobile-1.4.2.min.css" />
@@ -9,26 +9,32 @@
 <script src="http://code.jquery.com/mobile/1.4.2/jquery.mobile-1.4.2.min.js"></script>
 <script type='text/javascript'>  
     function addTram1(o){  
+        removeSpinner('#tram');
+        var results = "Données non disponibles"
         if ( o.query.results ) {
             var departs = o.query.results.p;
             results = '';
             for(var i=0;i<departs.length;i=i+3){  
                 results += "<li>"+departs[i]+' '+departs[i+1]+' '+departs[i+2].content.replace(/\(.*\)/,'')+'<span class="landscape">'+departs[i+2].content.replace(/.*\(/,'(')+"</span></li>";
             }
-            document.getElementById('resultatstram1').innerHTML = results;  
         }
+        document.getElementById('resultatstram1').innerHTML = results;  
     }  
     function addTram2(o){  
+        removeSpinner('#tram');
+        var results = "Données non disponibles"
         if ( o.query.results ) {
             var departs = o.query.results.p;
             results = '<hr/>';
             for(var i=0;i<departs.length;i=i+3){  
                 results += "<li>"+departs[i]+' '+departs[i+1]+' '+departs[i+2].content.replace(/\(.*\)/,'')+'<span class="landscape">'+departs[i+2].content.replace(/.*\(/,'(')+"</span></li>";
             }
-            document.getElementById('resultatstram2').innerHTML = results;  
         }
+        document.getElementById('resultatstram2').innerHTML = results;  
     }  
     function addBus(o){  
+        removeSpinner('#bus');
+        var results = "Données non disponibles"
         if ( o.query.results ) {
             var departs = o.query.results.p;
             results = '<ol>';
@@ -38,10 +44,13 @@
             results += '</ol>';
             if ( results == '' ) { results += '<hr/>'; }
             // append to
-            document.getElementById('resultatsbus').innerHTML = document.getElementById('resultatsbus').innerHTML + results;  
+            results = document.getElementById('resultatsbus').innerHTML + results;  
         }
+        document.getElementById('resultatsbus').innerHTML = results;  
     }  
     function addAvion(o){  
+        removeSpinner('#avion');
+        var results = "Données non disponibles"
         if ( o.query.results ) {
             var results = o.query.results.script.content;  
             eval(results); // results was a string
@@ -58,10 +67,12 @@
                 }
                 results += '</li>';
             }
-            document.getElementById('resultatsavions').innerHTML = results;  
         }
+        document.getElementById('resultatsavions').innerHTML = results;  
     }  
     function addSncf(o){  
+        removeSpinner('#train');
+        var results = "Données non disponibles"
         if ( o.query.results ) {
             var trains = o.query.results.td;
             results = '';
@@ -73,10 +84,12 @@
                 } 
                 results += '</li>';
             }
-            document.getElementById('resultatssncf').innerHTML = results;  
         }
+        document.getElementById('resultatssncf').innerHTML = results;  
     }  
     function addEdt(o){  
+        removeSpinner('#edt');
+        var results = "Données non disponibles"
         if ( o.query.results ) {
             var currentK = '' ; var nextK = '' ;
             var resultsCurrent = ''; var resultsNext = '';
@@ -114,8 +127,9 @@
                     resultsNext += "<li>"+ details[4] +' '+ details[5] +' '+ details[6] +' '+ details[7] +' '+ details[8] +' '+ details[9]+'</li>'; 
                 }
             }
-            document.getElementById('resultatsedt').innerHTML = resultsCurrent +'<hr/>'+ resultsNext;  
+            results = resultsCurrent +'<hr/>'+ resultsNext;  
         }
+        document.getElementById('resultatsedt').innerHTML = results;  
     }  
 // *********************************
 // helpers
@@ -152,11 +166,20 @@ function addSource(url){
     baliseScript.setAttribute( 'src', url );
     document.body.appendChild(baliseScript);
 }
-
+function addSpinner(selector,mess){
+ $(document).on('pageshow',selector,function(event){
+    $.mobile.loading( 'show', {text: mess, textVisible: true, theme: "a", textonly: false, html: '' });
+ });
+}
+function removeSpinner(selector){
+    $.mobile.loading( "hide" );
+    $(document).off('pageshow',selector);
+}
 // *********************************
 // on pageinit handlers
 // *********************************
-$(document).on('pageinit','#tram',function(event){
+$(document).on('pageinit','#tram',function(event){    
+    addSpinner('#tram','YQL/Tisséo Tram T1');
     var url = "http://query.yahooapis.com/v1/public/yql?q=select%20*%20from%20html%20where%20url%3D%22http%3A%2F%2Fwww.tisseo.fr%2Fprochains-passages%2Fresultat%3Fstop_num%3D60140%22%20and%20xpath%3D%22%2F%2Ftr%5B%40class%3D'horaires_pair'%20or%20%40class%3D'horaires_impair'%5D%2F%2Fp%22&format=json&callback=addTram1"
     addSource(url);
     url = "http://query.yahooapis.com/v1/public/yql?q=select%20*%20from%20html%20where%20url%3D%22http%3A%2F%2Fwww.tisseo.fr%2Fprochains-passages%2Fresultat%3Fstop_num%3D60141%22%20and%20xpath%3D%22%2F%2Ftr%5B%40class%3D'horaires_pair'%20or%20%40class%3D'horaires_impair'%5D%2F%2Fp%22&format=json&callback=addTram2"
@@ -164,6 +187,7 @@ $(document).on('pageinit','#tram',function(event){
 });
 
 $(document).on('pageinit','#bus',function(event){
+    addSpinner('#bus','YQL/Tisséo Bus 25');
     var url = "http://query.yahooapis.com/v1/public/yql?q=select%20*%20from%20html%20where%20url%3D%22http%3A%2F%2Fwww.tisseo.fr%2Fprochains-passages%2Fresultat%3Fstop_num%3D16440%22%20and%20xpath%3D%22%2F%2Ftr%5B%40class%3D'horaires_pair'%20or%20%40class%3D'horaires_impair'%5D%2F%2Fp%22&format=json&callback=addBus"
     addSource(url);
     url = "http://query.yahooapis.com/v1/public/yql?q=select%20*%20from%20html%20where%20url%3D%22http%3A%2F%2Fwww.tisseo.fr%2Fprochains-passages%2Fresultat%3Fstop_num%3D16443%22%20and%20xpath%3D%22%2F%2Ftr%5B%40class%3D'horaires_pair'%20or%20%40class%3D'horaires_impair'%5D%2F%2Fp%22&format=json&callback=addBus"
@@ -171,23 +195,27 @@ $(document).on('pageinit','#bus',function(event){
 });
 
 $(document).on('pageinit','#avion',function(event){ 
+    addSpinner('#avion','YQL/Flightradar24 Blagnac');
     var url = "http://query.yahooapis.com/v1/public/yql?q=select%20*%20from%20html%20where%20url%3D%22http%3A%2F%2Fwww.flightradar24.com%2Fairport%2Ftls%2Farrivals%22%20and%20xpath%3D%22%2F%2Fscript%5Bcontains(.%2C'initFlights')%5D%22%0A&format=json&callback=addAvion"
     addSource(url);
 });
 
 $(document).on('pageinit','#train',function(event){ 
+    addSpinner('#train','YQL/SNCF Matabiau');
     var url = "http://query.yahooapis.com/v1/public/yql?q=select%20*%20from%20html%20where%20url%3D%22http%3A%2F%2Fint.gares-en-mouvement.com%2Ffr%2Ffrxyt%2Fhoraires-temps-reel%2Farr%2F%22%20and%20xpath%3D%22%2F%2Ftd%5Bcontains(%40class%2C'tvs_td')%5D%22%0A%0A&format=json&callback=addSncf"
     addSource(url);
 });
 
 $(document).on('pageinit','#edt',function(event){
+    addSpinner('#edt','YQL/IUT Blagnac EDT');
     var d = new Date() ; 
     var numeroSemaine = d.getWeek() ;
     var currentDate = new Date() ;
     if (numeroSemaine < 10) { numeroSemaine = "0" + numeroSemaine; }
-    var urlEDT = "http://query.yahooapis.com/v1/public/yql?q=select%20*%20from%20html%20where%20url%3D%22http%3A%2F%2Falgec.iut-blagnac.fr%2Fiutblagnac%2Fedt%2Finfo%2F"+numeroSemaine+".txt%22&format=json&callback=addEdt"
-    addSource(urlEDT);
+    var url = "http://query.yahooapis.com/v1/public/yql?q=select%20*%20from%20html%20where%20url%3D%22http%3A%2F%2Falgec.iut-blagnac.fr%2Fiutblagnac%2Fedt%2Finfo%2F"+numeroSemaine+".txt%22&format=json&callback=addEdt"
+    addSource(url);
 });
+
 // *********************************
 // *********************************
 </script>  
@@ -203,7 +231,7 @@ $(document).on('pageinit','#edt',function(event){
 <body>
 
 <!-- DEBUT page accueil -->
-<div data-role="page" id="accueil" data-title="What's On - V0.4 - Accueil">
+<div data-role="page" id="accueil" data-title="What's On - V0.5 - Accueil">
 <div data-role="header" data-add-back-btn="true">
 <h1><span class="landscape">Bienvenue sur </span>What's On</h1>
 <a href="#credits" data-theme="b" class="ui-btn-right">Crédits</a></div>
@@ -223,13 +251,13 @@ $(document).on('pageinit','#edt',function(event){
 </div>
 <!-- FIN page accueil -->
 <!-- DEBUT page meteo -->
-<div data-role="page" id="meteo" data-title="What's On - V0.4 - Météo à Blagnac">
+<div data-role="page" id="meteo" data-title="What's On - V0.5 - Météo à Blagnac">
 <div data-role="header" data-add-back-btn="true">
 <h1>Météo à Blagnac</h1>
 </div>
 <div data-role="content">
 <center id="resultatsmeteo">
-<!-- the response do a document.write() : so, cannot be included on pageinit -->
+<!-- the response makes a document.write() : so, cannot be included on pageinit -->
 <script charset='UTF-8' src='http://www.meteofrance.com/mf3-rpc-portlet/rest/vignettepartenaire/310690/type/VILLE_FRANCE/size/PORTRAIT_VIGNETTE' type='text/javascript'></script>
 </center>
 </div>
@@ -240,7 +268,7 @@ $(document).on('pageinit','#edt',function(event){
 <!-- FIN page meteo -->
 
 <!-- DEBUT page tram -->
-<div data-role="page" id="tram" data-title="What's On - V0.4 - Tram T1">
+<div data-role="page" id="tram" data-title="What's On - V0.5 - Tram T1">
 <div data-role="header" data-add-back-btn="true">
 <h1>Tram T1</h1>
 </div>
@@ -257,7 +285,7 @@ $(document).on('pageinit','#edt',function(event){
 <!-- FIN page tram -->
 
 <!-- DEBUT page bus -->
-<div data-role="page" id="bus" data-title="What's On - V0.4 - Bus 25">
+<div data-role="page" id="bus" data-title="What's On - V0.5 - Bus 25">
 <div data-role="header" data-add-back-btn="true">
 <h1>Bus 25</h1>
 </div>
@@ -272,7 +300,7 @@ $(document).on('pageinit','#edt',function(event){
 <!-- FIN page bus -->
 
 <!-- DEBUT page avion -->
-<div data-role="page" id="avion" data-title="What's On - V0.4 - Aéroport de Blagnac">
+<div data-role="page" id="avion" data-title="What's On - V0.5 - Aéroport de Blagnac">
 <div data-role="header" data-add-back-btn="true">
 <h1>Arrivées <span class="landscape">Aéroport de </span>Blagnac</h1>
 </div>
@@ -287,7 +315,7 @@ $(document).on('pageinit','#edt',function(event){
 <!-- FIN page avion -->
 
 <!-- DEBUT page train -->
-<div data-role="page" id="train" data-title="What's On - V0.4 - Gare Matabiau">
+<div data-role="page" id="train" data-title="What's On - V0.5 - Gare Matabiau">
 <div data-role="header" data-add-back-btn="true">
 <h1>Arrivées <span class="landscape">Gare </span>Matabiau</h1>
 </div>
@@ -302,7 +330,7 @@ $(document).on('pageinit','#edt',function(event){
 <!-- FIN page train -->
 
 <!-- DEBUT page edt -->
-<div data-role="page" id="edt" data-title="What's On - V0.4 - Emploi du temps">
+<div data-role="page" id="edt" data-title="What's On - V0.5 - Emploi du temps">
 <div data-role="header" data-add-back-btn="true">
 <h1>DUT Info<span class="landscape">rmatique</span> BLAGNAC</h1>
 </div>
@@ -317,13 +345,14 @@ $(document).on('pageinit','#edt',function(event){
 <!-- FIN page edt -->
 
 <!-- DEBUT page credits -->
-<div data-role="page" id="credits" data-title="What's On - V0.4 - Crédits">
+<div data-role="page" id="credits" data-title="What's On - V0.5 - Crédits">
 <div data-role="header" data-add-back-btn="true">
 <h1>Crédits</h1>
 </div>
 <div data-role="content">
 <ul data-role="listview" data-inset="true" id="listeSources" data-theme="a" data-divider-theme="b">
     <li data-role="list-divider">Sites interrogés</li>
+    <li><a href="http://developer.yahoo.com/yql/" target="autrePage">http://developer.yahoo.com/yql/</a></li>
     <li><a href="http://www.meteofrance.com" target="autrePage">http://www.meteofrance.com</a></li>
     <li><a href="http://www.tisseo.fr/prochains-passages" target="autrePage">http://www.tisseo.fr</a></li>
     <li><a href="http://www.flightradar24.com/airport/tls/arrivals" target="autrePage">http://www.flightradar24.com</a></li>
@@ -343,6 +372,5 @@ $(document).on('pageinit','#edt',function(event){
 </div>
 </div>
 <!-- FIN page credits -->
-
 </body>
 </html>
