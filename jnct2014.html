@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="generator" content="myWhat's On V0.1" />
+<title>What's On - V0.1</title>
+<link rel="stylesheet" href="http://netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" />
+<link rel="stylesheet" href="http://code.jquery.com/mobile/1.4.2/jquery.mobile-1.4.2.min.css" />
+<script src="http://code.jquery.com/jquery-1.9.1.min.js"></script>
+<script src="http://code.jquery.com/mobile/1.4.2/jquery.mobile-1.4.2.min.js"></script>
+<style type='text/css'>    
+.landed { color: green; }
+.departed { color: green; }
+.delayed { color: red; }
+.estimated { color: orange; }
+.scheduled { display: none; }
+@media all and (orientation:portrait) { .landscape {display: none;} }
+@media all and (orientation:landscape) { .landscape {display: inline;} }
+</style>
+<script  type="text/javascript">
+function addSpinner(selector,mess){
+ $(document).on('pageshow',selector,function(event){
+    $.mobile.loading( 'show', {text: mess, textVisible: true, theme: "a", textonly: false, html: '' });
+ });
+}
+function removeSpinner(selector){
+    $.mobile.loading( "hide" );
+    $(document).off('pageshow',selector);
+}
+function addSource(id){
+    var baliseScript = document.createElement( 'script' );
+    baliseScript.setAttribute( 'src', 'https://query.yahooapis.com/v1/public/yql?q='+encodeURIComponent(SOURCES[id]["url"])+'&format=json&callback='+id );
+    document.body.appendChild(baliseScript);
+}
+function setpageinithandlers(hash){
+  $.each( hash, function( id, o ) {
+    $(document).on("pageinit","#"+id,function(event){
+      addSpinner('#'+id,SOURCES[id]["spinner"]);
+      addSource(id);
+    });  
+  });
+}
+
+function sciencesconf(o){  
+    var insub = false ;
+    var results = 'Aucune donnée disponible' ;
+    if ( o.query.results ) {
+        var ev1 = o.query.results.div.table.tbody.tr ;
+        var insublist = false ;
+        results = '';
+        for(var i=0;i<ev1.length;i=i+1){  
+            if ( ev1[i].td[0].span ){
+                if ( insublist ) { results += '</ul>' ; insublist = false ; }
+            results += '<li><b>' + ev1[i].td[0].span[0].content + ev1[i].td[0].span[1].content +ev1[i].td[0].span[2].content + '</b> ';
+            }
+            else {
+                if ( ! insublist ) { results += '</li><ul>' ; insublist = true ; }
+                results += '<li><b>' + ev1[i].td[0].p + '</b> ' ;
+            }
+            if ( ! $.isArray(ev1[i].td[1].span) ) {
+              sep = insublist ? '<br/>' : ' ' ;
+              results += ev1[i].td[1].span.content + sep ;
+              if ( ev1[i].td[1].p ) {
+                results += '<i>' + ev1[i].td[1].p.span.content + '</i>' ;
+              }
+            }
+            else {
+                results += ev1[i].td[1].span[0].content + ' ' + ev1[i].td[1].span[1].content + ' ' ;
+            }
+            results += '</li>';
+        }
+    }
+    return results;  
+}  
+
+function garesenmouvement(o){  
+    var results = 'Aucune donnée disponible' ;
+    if ( o.query.results ) {
+        var trains = o.query.results.td;
+        results = '';
+        for(var i=0;i<trains.length;i=i+7){  
+            results += "<li>"+trains[i+3].p.content.replace(/^(\d\d)/,"$1:")+' <span class="landscape">'+trains[i+1].p+' '+trains[i+2].p+'</span> '+trains[i+4].p+' ' ;
+            if (typeof trains[i+5].p != 'undefined'){
+                if (typeof trains[i+5].p.content != 'undefined') { results += '<span class="estimated">'+ trains[i+5].p.content +'</span>'; }
+                else { results += '<span class="landed">'+trains[i+5].p+'</span>'; }
+            } 
+            results += '</li>';
+        }
+    }
+    return results;  
+}  
+
+function tisseometro(o){  
+    var results = 'Aucune donnée disponible' ;
+    if ( o.query.results ) {
+        var infos = o.query.results.p;
+        results = '';
+        for(var i=0;i<infos.length;i=i+1){  
+            results += "<li>"+infos[i].content.replace(/\n/g,'<br/>')+"</li>";
+        }
+    }
+    return results;  
+}  
+
+function tisseotram(o){  
+    var results = 'Aucune donnée disponible' ;
+    if ( o.query.results ) {
+        var departs = o.query.results.p;
+        results = '';
+        for(var i=0;i<departs.length;i=i+3){  
+            results += "<li>"+departs[i]+' '+departs[i+1]+' Direction '+departs[i+2].content.replace(/\(.*\)/,'')+'<span class="landscape">'+departs[i+2].content.replace(/.*\(/,'(')+"</span></li>";
+        }
+    }
+    return results;  
+}  
+
+function flightradar(o){  
+    var results = 'Aucune donnée disponible' ;
+    if ( o.query.results ) {
+        var strjs = o.query.results.script.content;  
+        eval(strjs); // results was a string
+        var vols = eval(initFlights); // initFlights was a string
+        results = '';
+        for(var i=0;i<vols.length;i++){  
+            var d = new Date();
+            d.setTime(vols[i][8] * 1000);
+            results += "<li>"+d.toLocaleTimeString() +' '+ vols[i][12].replace('Airport','') +' '+ '<span class="landscape">[' + vols[i][4] + '] </span>' +' '+ '<span class="'+vols[i][17][0].toLowerCase()+'">'+ vols[i][17][0]+ '</span>'+' '; 
+            if ( vols[i][17][1] > 0 ){ 
+                var d = new Date();
+                d.setTime(vols[i][17][1] * 1000);
+                results += '<span class="landscape">'+d.toLocaleDateString()+ ' </span>' + d.toLocaleTimeString() ;
+            }
+            results += '</li>';
+        }
+    }
+    return results;  
+}  
+
+function flightradard(o){  
+    var results = 'Aucune donnée disponible' ;
+    if ( o.query.results ) {
+        var strjs = o.query.results.script.content;  
+        eval(strjs); // results was a string
+        var vols = eval(initFlights); // initFlights was a string
+        results = '';
+        for(var i=0;i<vols.length;i++){  
+            var d = new Date();
+            d.setTime(vols[i][7] * 1000);
+            results += "<li>"+d.toLocaleTimeString() +' '+ vols[i][16].replace('Airport','') +' '+ '<span class="landscape">[' + vols[i][4] + '] </span>' +' '+ '<span class="'+vols[i][17][0].toLowerCase()+'">'+ vols[i][17][0]+ '</span>'+' '; 
+            if ( vols[i][17][1] > 0 ){ 
+                var d = new Date();
+                d.setTime(vols[i][17][1] * 1000);
+                results += '<span class="landscape">'+d.toLocaleDateString()+ ' </span>' + d.toLocaleTimeString() ;
+            }
+            results += '</li>';
+        }
+    }
+    return results;  
+}  
+
+function tisseobus(o){  
+    var results = 'Aucune donnée disponible' ;
+    if ( o.query.results ) {
+        var departs = o.query.results.p;
+        results = '';
+        for(var i=0;i<departs.length;i=i+3){  
+            results += "<li>"+departs[i]+' '+departs[i+1]+' Direction '+departs[i+2].content.replace(/\s*\(/,'<span class="landscape"> (').replace(/\)/,')</span>')+'</li>';
+        }
+        if ( results == '' ) { results += '<hr/>'; }
+    }
+    return results;  
+}  
+
+</script>
+<script>
+var SOURCES = {"jnctj1": {"url": "select * from html where url=\"http://jnct2014.sciencesconf.org/program/details\" and xpath=\"//div[contains(@class,'program_details')]/div[2]\"",
+"spinner": "YQL/sciencesconf jnct2014/J1" },
+"jnctj2": {"url": "select * from html where url=\"http://jnct2014.sciencesconf.org/program/details\" and xpath=\"//div[contains(@class,'program_details')]/div[4]\"",
+"spinner": "YQL/sciencesconf jnct2014/J2" },
+"train": {"url": "select * from html where url=\"http://int.gares-en-mouvement.com/fr/frxyt/horaires-temps-reel/arr/\" and xpath=\"//td[contains(@class,'tvs_td')]\"",
+"spinner": "YQL/SNCF Matabiau" },
+"metro": {"url": "select * from html where url=\"http://www.tisseo.fr/sites/default/files/ligneMETRO.html\" and xpath=\"//p[contains(.,' min ') or contains(.,'terminus')]\"",
+"spinner": "YQL/Tisseo Metro" },
+"tram": {"url": "select * from html where url=\"http://www.tisseo.fr/prochains-passages/resultat?stop_num=60140\" and xpath=\"//tr[@class='horaires_pair' or @class='horaires_impair']//p\"",
+"spinner": "YQL/Tisseo Tram T1" },
+"avion": {"url": "select * from html where url=\"http://www.flightradar24.com/airport/tls/arrivals\" and xpath=\"//script[contains(.,'initFlights')]\"",
+"spinner": "YQL/Flightradar24 Blagnac" },
+"bus": {"url": "select * from html where url=\"http://www.tisseo.fr/prochains-passages/resultat?stop_num=27651\" and xpath=\"//tr[@class='horaires_pair' or @class='horaires_impair']//p|//div[@class='details-arret']//strong\"",
+"spinner": "YQL/Tisseo Bus 25" },
+"tramr": {"url": "select * from html where url=\"http://www.tisseo.fr/prochains-passages/resultat?stop_num=60141\" and xpath=\"//tr[@class='horaires_pair' or @class='horaires_impair']//p\"",
+"spinner": "YQL/Tisseo Tram T1" },
+"metror": {"url": "select * from html where url=\"http://www.tisseo.fr/sites/default/files/ligneMETRO.html\" and xpath=\"//p[contains(.,' min ') or contains(.,'terminus')]\"",
+"spinner": "YQL/Tisseo Metro" },
+"trainr": {"url": "select * from html where url=\"http://int.gares-en-mouvement.com/fr/frxyt/horaires-temps-reel/dep/\" and xpath=\"//td[contains(@class,'tvs_td')]\"",
+"spinner": "YQL/SNCF Matabiau" },
+"busr": {"url": "select * from html where url=\"http://www.tisseo.fr/prochains-passages/resultat?stop_num=16443\" and xpath=\"//tr[@class='horaires_pair' or @class='horaires_impair']//p|//div[@class='details-arret']//strong\"",
+"spinner": "YQL/Tisseo Bus 25" },
+"avionr": {"url": "select * from html where url=\"http://www.flightradar24.com/airport/tls/departures\" and xpath=\"//script[contains(.,'initFlights')]\"",
+"spinner": "YQL/Flightradar24 Blagnac" },
+"end":{}
+};
+setpageinithandlers(SOURCES);
+</script>
+<script>
+function jnctj1(o){
+removeSpinner("#jnctj1");
+document.getElementById("resultatsjnctj1").innerHTML = sciencesconf(o);
+};
+function jnctj2(o){
+removeSpinner("#jnctj2");
+document.getElementById("resultatsjnctj2").innerHTML = sciencesconf(o);
+};
+function train(o){
+removeSpinner("#train");
+document.getElementById("resultatstrain").innerHTML = garesenmouvement(o);
+};
+function metro(o){
+removeSpinner("#metro");
+document.getElementById("resultatsmetro").innerHTML = tisseometro(o);
+};
+function tram(o){
+removeSpinner("#tram");
+document.getElementById("resultatstram").innerHTML = tisseotram(o);
+};
+function avion(o){
+removeSpinner("#avion");
+document.getElementById("resultatsavion").innerHTML = flightradar(o);
+};
+function bus(o){
+removeSpinner("#bus");
+document.getElementById("resultatsbus").innerHTML = tisseobus(o);
+};
+function tramr(o){
+removeSpinner("#tramr");
+document.getElementById("resultatstramr").innerHTML = tisseotram(o);
+};
+function metror(o){
+removeSpinner("#metror");
+document.getElementById("resultatsmetror").innerHTML = tisseometro(o);
+};
+function trainr(o){
+removeSpinner("#trainr");
+document.getElementById("resultatstrainr").innerHTML = garesenmouvement(o);
+};
+function busr(o){
+removeSpinner("#busr");
+document.getElementById("resultatsbusr").innerHTML = tisseobus(o);
+};
+function avionr(o){
+removeSpinner("#avionr");
+document.getElementById("resultatsavionr").innerHTML = flightradard(o);
+};
+</script>
+</head><body>
+
+<!-- DEBUT page accueil -->
+<div data-role="page" id="accueil" data-title="What's On - V0.1 - Accueil">
+<div data-role="header" data-add-back-btn="true">
+<h1><span class="landscape">Bienvenue sur </span>myWhat's On</h1>
+<a href="#credits" data-theme="b" class="ui-btn-right">Crédits</a></div>
+<div data-role="content">
+<ul data-role="listview" data-inset="true" id="listeSources">
+  <li><a href="#jnct"><i class="fa fa-rss fa-2x"> JNCT 2014<span class="landscape"> - Blagnac</span></i></a></li>
+  <li><a href="#venir"><i class="fa fa-arrow-left fa-2x"> Venir à Blagnac</i></a></li>
+  <li><a href="#partir"><i class="fa fa-arrow-right fa-2x"> Partir de Blagnac</i></a></li>
+  <li><a href="#meteo"><i class="fa fa-umbrella fa-2x"> <span class="landscape">Météo - </span>Blagnac</i></a></li>
+
+</ul>
+</div>
+<div data-role="footer"> 
+ <h4>Toutes les infos du moment<span class="landscape"> en un instant !</span> <i class="fa fa-camera-retro fa-2x"></i></h4> 
+</div>
+</div>
+<!-- FIN page accueil -->
+<!-- DEBUT page credits -->
+<div data-role="page" id="credits" data-title="What's On - V0.1 - Crédits">
+<div data-role="header" data-add-back-btn="true">
+<h1>Crédits</h1>
+</div>
+<div data-role="content">
+<ul data-role="listview" data-inset="true" id="listecredits" data-theme="a" data-divider-theme="b">
+    <li data-role="list-divider">Sites interrogés</li>
+  <li><a href="https://sites.google.com/site/jnct2014/" target="autrePage">https://sites.google.com/site/jnct2014/</a></li>
+  <li><a href="http://int.gares-en-mouvement.com" target="autrePage">http://int.gares-en-mouvement.com</a></li>
+  <li><a href="http://www.flightradar24.com" target="autrePage">http://www.flightradar24.com</a></li>
+  <li><a href="http://www.tisseo.fr" target="autrePage">http://www.tisseo.fr</a></li>
+  <li><a href="http://www.meteofrance.com" target="autrePage">http://www.meteofrance.com</a></li>
+
+</ul>
+<ul data-role="listview" data-inset="true" id="listepowered" data-theme="a" data-divider-theme="b">
+    <li data-role="list-divider">Propulsé par</li>
+    <li><a href="https://developer.yahoo.com/yql/" target="autrePage">https://developer.yahoo.com/yql/</a></li>
+    <li><a href="http://jquerymobile.com/" target="autrePage">http://jquerymobile.com/</a></li>
+    <li><a href="http://fortawesome.github.io/Font-Awesome/" target="autrePage">http://fortawesome.github.io/Font-Awesome/</a></li>
+</ul>
+<ul data-role="listview" data-inset="true" id="contacts" data-theme="a" data-divider-theme="b">
+    <li data-role="list-divider">Contact</li>
+    <li>Jean-Michel INGLEBERT</li>
+    <li>Université Toulouse 2 - IUT de Blagnac
+    <br/>Département INFORMATIQUE</li>
+</ul>
+</div>
+<div data-role="footer"> 
+ <h4>Toutes les infos du moment<span class="landscape"> en un instant !</span> <i class="fa fa-camera-retro fa-2x"></i></h4> 
+</div>
+</div>
+<!-- FIN page credits -->
+
+<!-- DEBUT page jnct -->
+<div data-role="page" id="jnct" data-title="What's On - V0.1 - Gare Matabiau">
+<div data-role="header" data-add-back-btn="true">
+<h1>JNCT 2014<span class="landscape"> - Blagnac</span></h1>
+</div>
+<div data-role="content">
+  <center><b>Journées Nationales des Communications Terrestres</b><br/><br/>IUT de Blagnac<br/><a href="https://www.google.com/maps/@43.649917,1.37487,16z?hl=fr">1 Place Georges Brassens</a><br/>31703 BLAGNAC</center><p>Contacts:<br/><ul><li>Thierry VAL</li><li>Adrien VAN DEN BOSSCHE</li></ul></p>
+  <ul id="resultatsjnct" data-inset="true" data-mini="true">
+  </ul>
+  <ul data-role="listview" data-inset="true">  <li><a href="#jnctj1"><i class="fa fa-calendar fa-2x"> Programme <span class="landscape">Jeudi</span> 22 Mai</i></a></li>
+  <li><a href="#jnctj2"><i class="fa fa-calendar fa-2x"> Programme <span class="landscape">Vendredi</span> 23 Mai</i></a></li>
+</ul>
+  
+</div>
+<div data-role="footer"> 
+ <h4>JNCT 2014 <i class="fa fa-rss fa-2x"></i></h4> 
+</div>
+</div>
+<!-- FIN page jnct -->
+
+<!-- DEBUT page jnctj1 -->
+<div data-role="page" id="jnctj1" data-title="What's On - V0.1 - Gare Matabiau">
+<div data-role="header" data-add-back-btn="true">
+<h1>JNCT <span class="landscape">Jeudi</span> 22 Mai</h1>
+</div>
+<div data-role="content">
+  
+  <ul id="resultatsjnctj1" data-inset="true" data-mini="true">
+  </ul>
+  
+  
+</div>
+<div data-role="footer"> 
+ <h4>JNCT 2014 <i class="fa fa-calendar fa-2x"></i></h4> 
+</div>
+</div>
+<!-- FIN page jnctj1 -->
+
+<!-- DEBUT page jnctj2 -->
+<div data-role="page" id="jnctj2" data-title="What's On - V0.1 - Gare Matabiau">
+<div data-role="header" data-add-back-btn="true">
+<h1>JNCT <span class="landscape">Vendredi</span> 23 Mai</h1>
+</div>
+<div data-role="content">
+  
+  <ul id="resultatsjnctj2" data-inset="true" data-mini="true">
+  </ul>
+  
+  
+</div>
+<div data-role="footer"> 
+ <h4>JNCT 2014 <i class="fa fa-calendar fa-2x"></i></h4> 
+</div>
+</div>
+<!-- FIN page jnctj2 -->
+
+<!-- DEBUT page venir -->
+<div data-role="page" id="venir" data-title="What's On - V0.1 - Gare Matabiau">
+<div data-role="header" data-add-back-btn="true">
+<h1>Venir à Blagnac</h1>
+</div>
+<div data-role="content">
+  <center>IUT de Blagnac<br/><a href="https://www.google.com/maps/@43.649917,1.37487,16z?hl=fr">1 Place Georges Brassens</a><br/>31703 BLAGNAC</center><br/><ul><li>Gare SNCF, Métro Ligne A, Tram T1</li><li>Aéroport, Bus 25</li></ul><center class="landed">Ticket Réseau Tisséo unique pour Métro, Tram et Bus<br/>Pass 1/2/3 jours disponibles</center>
+  <ul id="resultatsvenir" data-inset="true" data-mini="true">
+  </ul>
+  <ul data-role="listview" data-inset="true">  <li><a href="#train"><i class="fa fa-suitcase fa-2x"> <span class="landscape"> Arrivées -</span> Matabiau</i></a></li>
+  <li><a href="#metro"><i class="fa fa-exchange fa-2x">  Métro Ligne A<span class="landscape"> - Gare Matabiau</span></i></a></li>
+  <li><a href="#tram"><i class="fa fa-exchange fa-2x">  Tram T1<span class="landscape"> - Arênes</span></i></a></li>
+  <li><a href="#avion"><i class="fa fa-plane fa-2x"> <span class="landscape"> Arrivées -</span> Blagnac</i></a></li>
+  <li><a href="#bus"><i class="fa fa-truck fa-2x">  Bus 25<span class="landscape"> - Aéroport</span></i></a></li>
+</ul>
+  
+</div>
+<div data-role="footer"> 
+ <h4>JNCT 2014 <i class="fa fa-arrow-left fa-2x"></i></h4> 
+</div>
+</div>
+<!-- FIN page venir -->
+
+<!-- DEBUT page train -->
+<div data-role="page" id="train" data-title="What's On - V0.1 - Gare Matabiau">
+<div data-role="header" data-add-back-btn="true">
+<h1><span class="landscape"> Arrivées -</span> Gare Matabiau</h1>
+</div>
+<div data-role="content">
+  
+  <ul id="resultatstrain" data-inset="true" data-mini="true">
+  </ul>
+  
+  
+</div>
+<div data-role="footer"> 
+ <h4>Toutes les infos du moment<span class="landscape"> en un instant !</span> <i class="fa fa-suitcase fa-2x"></i></h4> 
+</div>
+</div>
+<!-- FIN page train -->
+
+<!-- DEBUT page metro -->
+<div data-role="page" id="metro" data-title="What's On - V0.1 - Gare Matabiau">
+<div data-role="header" data-add-back-btn="true">
+<h1> Métro Ligne A<span class="landscape"> - Gare Matabiau</span><br/>Direction Basso Combo<br/>Jusqu'à Arènes<br/>environ 15mn</h1>
+</div>
+<div data-role="content">
+  
+  <ul id="resultatsmetro" data-inset="true" data-mini="true">
+  </ul>
+  
+  
+</div>
+<div data-role="footer"> 
+ <h4>Toutes les infos du moment<span class="landscape"> en un instant !</span> <i class="fa fa-exchange fa-2x"></i></h4> 
+</div>
+</div>
+<!-- FIN page metro -->
+
+<!-- DEBUT page tram -->
+<div data-role="page" id="tram" data-title="What's On - V0.1 - Gare Matabiau">
+<div data-role="header" data-add-back-btn="true">
+<h1> Tram T1<span class="landscape"> - Arênes</span><br/>Direction Aéroconstellation<br/>Jusqu'à Place G. Brassens<br/>environ 25mn</h1>
+</div>
+<div data-role="content">
+  
+  <ul id="resultatstram" data-inset="true" data-mini="true">
+  </ul>
+  
+  
+</div>
+<div data-role="footer"> 
+ <h4>Toutes les infos du moment<span class="landscape"> en un instant !</span> <i class="fa fa-exchange fa-2x"></i></h4> 
+</div>
+</div>
+<!-- FIN page tram -->
+
+<!-- DEBUT page avion -->
+<div data-role="page" id="avion" data-title="What's On - V0.1 - Gare Matabiau">
+<div data-role="header" data-add-back-btn="true">
+<h1><span class="landscape"> Arrivées -</span> Blagnac</h1>
+</div>
+<div data-role="content">
+  
+  <ul id="resultatsavion" data-inset="true" data-mini="true">
+  </ul>
+  
+  
+</div>
+<div data-role="footer"> 
+ <h4>Toutes les infos du moment<span class="landscape"> en un instant !</span> <i class="fa fa-plane fa-2x"></i></h4> 
+</div>
+</div>
+<!-- FIN page avion -->
+
+<!-- DEBUT page bus -->
+<div data-role="page" id="bus" data-title="What's On - V0.1 - Gare Matabiau">
+<div data-role="header" data-add-back-btn="true">
+<h1> Bus 25<span class="landscape"> - Aéroport</span><br/>Direction Blagnac Emile Zola<br/>Jusqu'à Place G. Brassens<br/>environ 10mn</h1>
+</div>
+<div data-role="content">
+  
+  <ul id="resultatsbus" data-inset="true" data-mini="true">
+  </ul>
+  
+  
+</div>
+<div data-role="footer"> 
+ <h4>Toutes les infos du moment<span class="landscape"> en un instant !</span> <i class="fa fa-truck fa-2x"></i></h4> 
+</div>
+</div>
+<!-- FIN page bus -->
+
+<!-- DEBUT page partir -->
+<div data-role="page" id="partir" data-title="What's On - V0.1 - Gare Matabiau">
+<div data-role="header" data-add-back-btn="true">
+<h1>Partir de Blagnac</h1>
+</div>
+<div data-role="content">
+  <center>IUT de Blagnac<br/><a href="https://www.google.com/maps/@43.649917,1.37487,16z?hl=fr">1 Place Georges Brassens</a><br/>31703 BLAGNAC</center><br/><ul><li>Tram T1, Métro Ligne A, Gare SNCF</li><li>Bus 25, Aéroport</li></ul><center class="landed">Ticket Réseau Tisséo unique pour Métro, Tram et Bus<br/>Pass 1/2/3 jours disponibles</center>
+  <ul id="resultatspartir" data-inset="true" data-mini="true">
+  </ul>
+  <ul data-role="listview" data-inset="true">  <li><a href="#tramr"><i class="fa fa-exchange fa-2x">  Tram T1<span class="landscape"> - Place G. Brassens</span></i></a></li>
+  <li><a href="#metror"><i class="fa fa-exchange fa-2x">  Métro Ligne A<span class="landscape"> - Arènes</span></i></a></li>
+  <li><a href="#trainr"><i class="fa fa-suitcase fa-2x"> <span class="landscape"> Départs -</span> Matabiau</i></a></li>
+  <li><a href="#busr"><i class="fa fa-truck fa-2x">  Bus 25<span class="landscape"> - Place G. Brassens</span></i></a></li>
+  <li><a href="#avionr"><i class="fa fa-plane fa-2x"> Départs <span class="landscape">- Blagnac</span></i></a></li>
+</ul>
+  
+</div>
+<div data-role="footer"> 
+ <h4>JNCT 2014 <i class="fa fa-arrow-right fa-2x"></i></h4> 
+</div>
+</div>
+<!-- FIN page partir -->
+
+<!-- DEBUT page tramr -->
+<div data-role="page" id="tramr" data-title="What's On - V0.1 - Gare Matabiau">
+<div data-role="header" data-add-back-btn="true">
+<h1> Tram T1<span class="landscape"> - Place G. Brassens</span><br/>Direction Palais de Justice<br/>Jusqu'à Arênes<br/>environ 25mn</h1>
+</div>
+<div data-role="content">
+  
+  <ul id="resultatstramr" data-inset="true" data-mini="true">
+  </ul>
+  
+  
+</div>
+<div data-role="footer"> 
+ <h4>Toutes les infos du moment<span class="landscape"> en un instant !</span> <i class="fa fa-exchange fa-2x"></i></h4> 
+</div>
+</div>
+<!-- FIN page tramr -->
+
+<!-- DEBUT page metror -->
+<div data-role="page" id="metror" data-title="What's On - V0.1 - Gare Matabiau">
+<div data-role="header" data-add-back-btn="true">
+<h1> Métro Ligne A<span class="landscape"> - Arènes</span><br/>Direction Balma-Gramont<br/>Jusqu'à Marengo-SNCF<br/>environ 15mn</h1>
+</div>
+<div data-role="content">
+  
+  <ul id="resultatsmetror" data-inset="true" data-mini="true">
+  </ul>
+  
+  
+</div>
+<div data-role="footer"> 
+ <h4>Toutes les infos du moment<span class="landscape"> en un instant !</span> <i class="fa fa-exchange fa-2x"></i></h4> 
+</div>
+</div>
+<!-- FIN page metror -->
+
+<!-- DEBUT page trainr -->
+<div data-role="page" id="trainr" data-title="What's On - V0.1 - Gare Matabiau">
+<div data-role="header" data-add-back-btn="true">
+<h1><span class="landscape"> Départs -</span> Gare Matabiau</h1>
+</div>
+<div data-role="content">
+  
+  <ul id="resultatstrainr" data-inset="true" data-mini="true">
+  </ul>
+  
+  
+</div>
+<div data-role="footer"> 
+ <h4>Toutes les infos du moment<span class="landscape"> en un instant !</span> <i class="fa fa-suitcase fa-2x"></i></h4> 
+</div>
+</div>
+<!-- FIN page trainr -->
+
+<!-- DEBUT page busr -->
+<div data-role="page" id="busr" data-title="What's On - V0.1 - Gare Matabiau">
+<div data-role="header" data-add-back-btn="true">
+<h1> Bus 25<span class="landscape"> - Place G. Brassens</span><br/>Direction Aéroport<br/>Jusqu'à Aéroport<br/>environ 10mn</h1>
+</div>
+<div data-role="content">
+  
+  <ul id="resultatsbusr" data-inset="true" data-mini="true">
+  </ul>
+  
+  
+</div>
+<div data-role="footer"> 
+ <h4>Toutes les infos du moment<span class="landscape"> en un instant !</span> <i class="fa fa-truck fa-2x"></i></h4> 
+</div>
+</div>
+<!-- FIN page busr -->
+
+<!-- DEBUT page avionr -->
+<div data-role="page" id="avionr" data-title="What's On - V0.1 - Gare Matabiau">
+<div data-role="header" data-add-back-btn="true">
+<h1>Départs <span class="landscape">- Blagnac</span></h1>
+</div>
+<div data-role="content">
+  
+  <ul id="resultatsavionr" data-inset="true" data-mini="true">
+  </ul>
+  
+  
+</div>
+<div data-role="footer"> 
+ <h4>Toutes les infos du moment<span class="landscape"> en un instant !</span> <i class="fa fa-plane fa-2x"></i></h4> 
+</div>
+</div>
+<!-- FIN page avionr -->
+
+<!-- DEBUT page meteo -->
+<div data-role="page" id="meteo" data-title="What's On - V0.1 - Gare Matabiau">
+<div data-role="header" data-add-back-btn="true">
+<h1><span class="landscape">Météo - </span>Blagnac</h1>
+</div>
+<div data-role="content">
+  
+  <ul id="resultatsmeteo" data-inset="true" data-mini="true">
+  </ul>
+  
+  <center><script charset="UTF-8" src="http://www.meteofrance.com/mf3-rpc-portlet/rest/vignettepartenaire/310690/type/VILLE_FRANCE/size/PORTRAIT_VIGNETTE" type="text/javascript"></script></center>
+</div>
+<div data-role="footer"> 
+ <h4>Toutes les infos du moment<span class="landscape"> en un instant !</span> <i class="fa fa-umbrella fa-2x"></i></h4> 
+</div>
+</div>
+<!-- FIN page meteo -->
+
+</body>
+</html>
