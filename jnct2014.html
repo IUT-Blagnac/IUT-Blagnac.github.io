@@ -41,7 +41,11 @@ function setpageinithandlers(hash){
     });  
   });
 }
-
+function reload(id){
+    document.getElementById('resultats'+id).innerHTML = '' ;
+    $.mobile.loading( 'show', {text: SOURCES[id]["spinner"], textVisible: true, theme: "a", textonly: false, html: '' });
+    addSource(id);
+}
 function sciencesconf(o){  
     var insub = false ;
     var results = 'Aucune donnée disponible' ;
@@ -258,7 +262,8 @@ document.getElementById("resultatsavionr").innerHTML = flightradard(o);
 <div data-role="page" id="accueil" data-title="myWhat's On - JNCT 2014">
 <div data-role="header" data-add-back-btn="true">
 <h1><span class="landscape">Bienvenue sur </span>myWhat's On</h1>
-<a href="#credits" data-theme="b" class="ui-btn-right">Crédits</a></div>
+<a href="#credits" data-theme="b" class="ui-btn-right">Crédits</a>
+</div>
 <div data-role="content">
 <ul data-role="listview" data-inset="true" id="listeSources">
   <li><a href="#jnct"><i class="fa fa-rss fa-2x"> JNCT 2014<span class="landscape"> - Blagnac</span></i></a></li>
@@ -311,6 +316,7 @@ document.getElementById("resultatsavionr").innerHTML = flightradard(o);
 <div data-role="page" id="jnct" data-title="myWhat's On - JNCT 2014">
 <div data-role="header" data-add-back-btn="true">
 <h1>JNCT 2014<span class="landscape"> - Blagnac</span></h1>
+
 </div>
 <div data-role="content">
   <center><b>Journées Nationales des Communications Terrestres</b><br/><br/>IUT de Blagnac<br/><a href="https://www.google.com/maps/@43.649917,1.37487,16z?hl=fr">1 Place Georges Brassens</a><br/>31703 BLAGNAC</center><p>Contacts:<br/><ul><li>Thierry VAL</li><li>Adrien VAN DEN BOSSCHE</li></ul></p>
@@ -331,6 +337,7 @@ document.getElementById("resultatsavionr").innerHTML = flightradard(o);
 <div data-role="page" id="jnctj1" data-title="myWhat's On - JNCT 2014">
 <div data-role="header" data-add-back-btn="true">
 <h1>JNCT <span class="landscape">Jeudi</span> 22 Mai</h1>
+<a href="javascript:reload('jnctj1')" class="ui-btn-right"><i class="fa fa-refresh fa-2x"></i></a>
 </div>
 <div data-role="content">
   
@@ -349,6 +356,7 @@ document.getElementById("resultatsavionr").innerHTML = flightradard(o);
 <div data-role="page" id="jnctj2" data-title="myWhat's On - JNCT 2014">
 <div data-role="header" data-add-back-btn="true">
 <h1>JNCT <span class="landscape">Vendredi</span> 23 Mai</h1>
+<a href="javascript:reload('jnctj2')" class="ui-btn-right"><i class="fa fa-refresh fa-2x"></i></a>
 </div>
 <div data-role="content">
   
@@ -367,9 +375,10 @@ document.getElementById("resultatsavionr").innerHTML = flightradard(o);
 <div data-role="page" id="venir" data-title="myWhat's On - JNCT 2014">
 <div data-role="header" data-add-back-btn="true">
 <h1>Venir à Blagnac</h1>
+
 </div>
 <div data-role="content">
-  <center>IUT de Blagnac<br/><a href="https://www.google.com/maps/@43.649917,1.37487,16z?hl=fr">1 Place Georges Brassens</a><br/>31703 BLAGNAC</center><br/><ul><li>Gare SNCF, Métro Ligne A, Tram T1</li><li>Aéroport, Bus 25</li></ul><center class="landed">Ticket Réseau Tisséo unique pour Métro, Tram et Bus<br/>Pass 1/2/3 jours disponibles</center>
+  <center>IUT de Blagnac<br/><a href="https://www.google.com/maps/@43.649917,1.37487,16z?hl=fr">1 Place Georges Brassens</a><br/>31703 BLAGNAC</center><br/><ul><li>Gare SNCF <i class="fa fa-chevron-right"></i> Métro Ligne A <i class="fa fa-chevron-right"></i> Tram T1</li><li>Aéroport <i class="fa fa-chevron-right"></i> Bus 25</li></ul><center class="landed">Ticket Réseau Tisséo unique pour Métro, Tram et Bus<br/>Pass 1/2/3 jours disponibles</center>
   <ul id="resultatsvenir" data-inset="true" data-mini="true">
   </ul>
   <ul data-role="listview" data-inset="true">  <li><a href="#train"><i class="fa fa-suitcase fa-2x"> Arrivées <span class="landscape">- Gare Matabiau</span></i></a></li>
@@ -390,6 +399,7 @@ document.getElementById("resultatsavionr").innerHTML = flightradard(o);
 <div data-role="page" id="train" data-title="myWhat's On - JNCT 2014">
 <div data-role="header" data-add-back-btn="true">
 <h1>Arrivées <span class="landscape">- Gare Matabiau</span></h1>
+<a href="javascript:reload('train')" class="ui-btn-right"><i class="fa fa-refresh fa-2x"></i></a>
 </div>
 <div data-role="content">
   
@@ -408,6 +418,7 @@ document.getElementById("resultatsavionr").innerHTML = flightradard(o);
 <div data-role="page" id="metro" data-title="myWhat's On - JNCT 2014">
 <div data-role="header" data-add-back-btn="true">
 <h1> Métro Ligne A<span class="landscape"> - Gare Matabiau</span><br/>Direction Basso Combo<br/>Jusqu'à Arènes<br/>environ 15mn</h1>
+<a href="javascript:reload('metro')" class="ui-btn-right"><i class="fa fa-refresh fa-2x"></i></a>
 </div>
 <div data-role="content">
   
@@ -426,6 +437,7 @@ document.getElementById("resultatsavionr").innerHTML = flightradard(o);
 <div data-role="page" id="tram" data-title="myWhat's On - JNCT 2014">
 <div data-role="header" data-add-back-btn="true">
 <h1> Tram T1<span class="landscape"> - Arênes</span><br/>Direction Aéroconstellation<br/>Jusqu'à Place G. Brassens<br/>environ 25mn</h1>
+<a href="javascript:reload('tram')" class="ui-btn-right"><i class="fa fa-refresh fa-2x"></i></a>
 </div>
 <div data-role="content">
   
@@ -444,6 +456,7 @@ document.getElementById("resultatsavionr").innerHTML = flightradard(o);
 <div data-role="page" id="avion" data-title="myWhat's On - JNCT 2014">
 <div data-role="header" data-add-back-btn="true">
 <h1>Arrivées <span class="landscape">- Aéroport Blagnac</span></h1>
+<a href="javascript:reload('avion')" class="ui-btn-right"><i class="fa fa-refresh fa-2x"></i></a>
 </div>
 <div data-role="content">
   
@@ -462,6 +475,7 @@ document.getElementById("resultatsavionr").innerHTML = flightradard(o);
 <div data-role="page" id="bus" data-title="myWhat's On - JNCT 2014">
 <div data-role="header" data-add-back-btn="true">
 <h1> Bus 25<span class="landscape"> - Aéroport</span><br/>Direction Blagnac Emile Zola<br/>Jusqu'à Place G. Brassens<br/>environ 10mn</h1>
+<a href="javascript:reload('bus')" class="ui-btn-right"><i class="fa fa-refresh fa-2x"></i></a>
 </div>
 <div data-role="content">
   
@@ -480,9 +494,10 @@ document.getElementById("resultatsavionr").innerHTML = flightradard(o);
 <div data-role="page" id="partir" data-title="myWhat's On - JNCT 2014">
 <div data-role="header" data-add-back-btn="true">
 <h1>Partir de Blagnac</h1>
+
 </div>
 <div data-role="content">
-  <center>IUT de Blagnac<br/><a href="https://www.google.com/maps/@43.649917,1.37487,16z?hl=fr">1 Place Georges Brassens</a><br/>31703 BLAGNAC</center><br/><ul><li>Tram T1, Métro Ligne A, Gare SNCF</li><li>Bus 25, Aéroport</li></ul><center class="landed">Ticket Réseau Tisséo unique pour Métro, Tram et Bus<br/>Pass 1/2/3 jours disponibles</center>
+  <center>IUT de Blagnac<br/><a href="https://www.google.com/maps/@43.649917,1.37487,16z?hl=fr">1 Place Georges Brassens</a><br/>31703 BLAGNAC</center><br/><ul><li>Tram T1 <i class="fa fa-chevron-right"></i> Métro Ligne A <i class="fa fa-chevron-right"></i> Gare SNCF</li><li>Bus 25 <i class="fa fa-chevron-right"></i> Aéroport</li></ul><center class="landed">Ticket Réseau Tisséo unique pour Métro, Tram et Bus<br/>Pass 1/2/3 jours disponibles</center>
   <ul id="resultatspartir" data-inset="true" data-mini="true">
   </ul>
   <ul data-role="listview" data-inset="true">  <li><a href="#tramr"><i class="fa fa-exchange fa-2x">  Tram T1<span class="landscape"> - Place G. Brassens</span></i></a></li>
@@ -503,6 +518,7 @@ document.getElementById("resultatsavionr").innerHTML = flightradard(o);
 <div data-role="page" id="tramr" data-title="myWhat's On - JNCT 2014">
 <div data-role="header" data-add-back-btn="true">
 <h1> Tram T1<span class="landscape"> - Place G. Brassens</span><br/>Direction Palais de Justice<br/>Jusqu'à Arênes<br/>environ 25mn</h1>
+<a href="javascript:reload('tramr')" class="ui-btn-right"><i class="fa fa-refresh fa-2x"></i></a>
 </div>
 <div data-role="content">
   
@@ -521,6 +537,7 @@ document.getElementById("resultatsavionr").innerHTML = flightradard(o);
 <div data-role="page" id="metror" data-title="myWhat's On - JNCT 2014">
 <div data-role="header" data-add-back-btn="true">
 <h1> Métro Ligne A<span class="landscape"> - Arènes</span><br/>Direction Balma-Gramont<br/>Jusqu'à Marengo-SNCF<br/>environ 15mn</h1>
+<a href="javascript:reload('metror')" class="ui-btn-right"><i class="fa fa-refresh fa-2x"></i></a>
 </div>
 <div data-role="content">
   
@@ -539,6 +556,7 @@ document.getElementById("resultatsavionr").innerHTML = flightradard(o);
 <div data-role="page" id="trainr" data-title="myWhat's On - JNCT 2014">
 <div data-role="header" data-add-back-btn="true">
 <h1>Départs <span class="landscape">- Gare Matabiau</span></h1>
+<a href="javascript:reload('trainr')" class="ui-btn-right"><i class="fa fa-refresh fa-2x"></i></a>
 </div>
 <div data-role="content">
   
@@ -557,6 +575,7 @@ document.getElementById("resultatsavionr").innerHTML = flightradard(o);
 <div data-role="page" id="busr" data-title="myWhat's On - JNCT 2014">
 <div data-role="header" data-add-back-btn="true">
 <h1> Bus 25<span class="landscape"> - Place G. Brassens</span><br/>Direction Aéroport<br/>Jusqu'à Aéroport<br/>environ 10mn</h1>
+<a href="javascript:reload('busr')" class="ui-btn-right"><i class="fa fa-refresh fa-2x"></i></a>
 </div>
 <div data-role="content">
   
@@ -575,6 +594,7 @@ document.getElementById("resultatsavionr").innerHTML = flightradard(o);
 <div data-role="page" id="avionr" data-title="myWhat's On - JNCT 2014">
 <div data-role="header" data-add-back-btn="true">
 <h1>Départs <span class="landscape">- Blagnac</span></h1>
+<a href="javascript:reload('avionr')" class="ui-btn-right"><i class="fa fa-refresh fa-2x"></i></a>
 </div>
 <div data-role="content">
   
@@ -593,6 +613,7 @@ document.getElementById("resultatsavionr").innerHTML = flightradard(o);
 <div data-role="page" id="meteo" data-title="myWhat's On - JNCT 2014">
 <div data-role="header" data-add-back-btn="true">
 <h1><span class="landscape">Météo - </span>Blagnac</h1>
+
 </div>
 <div data-role="content">
   
