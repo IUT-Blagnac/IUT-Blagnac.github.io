@@ -182,7 +182,7 @@ var SOURCES = {"jnctj1": {"url": "select * from html where url=\"http://jnct2014
 "spinner": "YQL/sciencesconf jnct2014/J1" },
 "jnctj2": {"url": "select * from html where url=\"http://jnct2014.sciencesconf.org/program/details\" and xpath=\"//div[contains(@class,'program_details')]/div[4]\"",
 "spinner": "YQL/sciencesconf jnct2014/J2" },
-"train": {"url": "select * from html where url=\"http://int.gares-en-mouvement.com/fr/frxyt/horaires-temps-reel/arr/\" and xpath=\"//td[contains(@class,'tvs_td')]\"",
+"train": {"url": "select * from html where url=\"http://www.gares-en-mouvement.com/fr/frxyt/horaires-temps-reel/arr/\" and xpath=\"//td[contains(@class,'tvs_td')]\"",
 "spinner": "YQL/SNCF Matabiau" },
 "metro": {"url": "select * from html where url=\"http://www.tisseo.fr/sites/default/files/ligneMETRO.html\" and xpath=\"//p[contains(.,' min ') or contains(.,'terminus')]\"",
 "spinner": "YQL/Tisseo Metro" },
@@ -196,7 +196,7 @@ var SOURCES = {"jnctj1": {"url": "select * from html where url=\"http://jnct2014
 "spinner": "YQL/Tisseo Tram T1" },
 "metror": {"url": "select * from html where url=\"http://www.tisseo.fr/sites/default/files/ligneMETRO.html\" and xpath=\"//p[contains(.,' min ') or contains(.,'terminus')]\"",
 "spinner": "YQL/Tisseo Metro" },
-"trainr": {"url": "select * from html where url=\"http://int.gares-en-mouvement.com/fr/frxyt/horaires-temps-reel/dep/\" and xpath=\"//td[contains(@class,'tvs_td')]\"",
+"trainr": {"url": "select * from html where url=\"http://www.gares-en-mouvement.com/fr/frxyt/horaires-temps-reel/dep/\" and xpath=\"//td[contains(@class,'tvs_td')]\"",
 "spinner": "YQL/SNCF Matabiau" },
 "busr": {"url": "select * from html where url=\"http://www.tisseo.fr/prochains-passages/resultat?stop_num=16443\" and xpath=\"//tr[@class='horaires_pair' or @class='horaires_impair']//p|//div[@class='details-arret']//strong\"",
 "spinner": "YQL/Tisseo Bus 25" },
@@ -287,7 +287,7 @@ document.getElementById("resultatsavionr").innerHTML = flightradard(o);
 <ul data-role="listview" data-inset="true" id="listecredits" data-theme="a" data-divider-theme="b">
     <li data-role="list-divider">Sites interrogés</li>
   <li><a href="https://sites.google.com/site/jnct2014/" target="autrePage">https://sites.google.com/site/jnct2014/</a></li>
-  <li><a href="http://int.gares-en-mouvement.com" target="autrePage">http://int.gares-en-mouvement.com</a></li>
+  <li><a href="http://www.gares-en-mouvement.com" target="autrePage">http://www.gares-en-mouvement.com</a></li>
   <li><a href="http://www.flightradar24.com" target="autrePage">http://www.flightradar24.com</a></li>
   <li><a href="http://www.tisseo.fr" target="autrePage">http://www.tisseo.fr</a></li>
   <li><a href="http://www.meteofrance.com" target="autrePage">http://www.meteofrance.com</a></li>
